@@ -9,7 +9,7 @@ import com.mathlearning.model.*;
 import com.mathlearning.repository.*;
 import com.mathlearning.service.IAIGradingService;
 import com.mathlearning.service.ISubmissionService;
-import com.mathlearning.service.StorageService;
+import com.mathlearning.service.IStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class SubmissionServiceImpl implements ISubmissionService {
     private final UserProgressRepository userProgressRepository;
     private final MistakeNotebookRepository mistakeNotebookRepository;
     private final IAIGradingService aiGradingService;
-    private final StorageService storageService;
+    private final IStorageService storageService;
 
     @Override
     @Transactional

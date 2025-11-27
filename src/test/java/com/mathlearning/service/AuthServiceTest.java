@@ -8,7 +8,7 @@ import com.mathlearning.model.User;
 import com.mathlearning.model.UserProgress;
 import com.mathlearning.repository.UserProgressRepository;
 import com.mathlearning.repository.UserRepository;
-import com.mathlearning.security.JwtTokenProvider;
+import com.mathlearning.security.IJwtTokenProvider;
 import com.mathlearning.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +40,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private JwtTokenProvider jwtTokenProvider;
+    private IJwtTokenProvider jwtTokenProvider;
 
     @InjectMocks
     private AuthServiceImpl authService;

@@ -8,7 +8,7 @@ import com.mathlearning.model.User;
 import com.mathlearning.model.UserProgress;
 import com.mathlearning.repository.UserProgressRepository;
 import com.mathlearning.repository.UserRepository;
-import com.mathlearning.security.JwtTokenProvider;
+import com.mathlearning.security.IJwtTokenProvider;
 import com.mathlearning.service.IAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class AuthServiceImpl implements IAuthService {
     private final UserRepository userRepository;
     private final UserProgressRepository userProgressRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final IJwtTokenProvider jwtTokenProvider;
 
     @Override
     @Transactional

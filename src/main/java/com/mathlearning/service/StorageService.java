@@ -15,7 +15,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class StorageService {
+public class StorageService implements IStorageService {
 
     private final S3Client s3Client;
 
