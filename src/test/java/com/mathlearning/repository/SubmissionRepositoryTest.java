@@ -7,8 +7,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+@TestPropertySource(properties = "spring.flyway.enabled=false")
 @DisplayName("SubmissionRepository Tests")
 class SubmissionRepositoryTest {
 
@@ -54,17 +59,13 @@ class SubmissionRepositoryTest {
     @Test
     @DisplayName("Should find submissions by user ID ordered by created date")
     void findByUserIdOrderByCreatedAtDesc_ReturnsOrderedSubmissions() {
-        // given
         Submission submission1 = createSubmission(BigDecimal.valueOf(8.0), true);
         Submission submission2 = createSubmission(BigDecimal.valueOf(9.5), true);
         entityManager.persist(submission1);
         entityManager.persist(submission2);
         entityManager.flush();
 
-        // when
         List<Submission> submissions = submissionRepository.findByUserIdOrderByCreatedAtDesc(testUser.getId());
-
-        // then
         assertThat(submissions).hasSize(2);
         assertThat(submissions.get(0).getAiScore()).isEqualByComparingTo(BigDecimal.valueOf(9.5));
     }
@@ -72,7 +73,6 @@ class SubmissionRepositoryTest {
     @Test
     @DisplayName("Should count submissions by user ID and correctness")
     void countByUserIdAndIsCorrect_ReturnsCorrectCount() {
-        // given
         Submission correct1 = createSubmission(BigDecimal.valueOf(9.0), true);
         Submission correct2 = createSubmission(BigDecimal.valueOf(8.5), true);
         Submission incorrect = createSubmission(BigDecimal.valueOf(4.0), false);
@@ -81,11 +81,8 @@ class SubmissionRepositoryTest {
         entityManager.persist(incorrect);
         entityManager.flush();
 
-        // when
         long correctCount = submissionRepository.countByUserIdAndIsCorrect(testUser.getId(), true);
         long incorrectCount = submissionRepository.countByUserIdAndIsCorrect(testUser.getId(), false);
-
-        // then
         assertThat(correctCount).isEqualTo(2);
         assertThat(incorrectCount).isEqualTo(1);
     }
@@ -93,17 +90,13 @@ class SubmissionRepositoryTest {
     @Test
     @DisplayName("Should return zero count when no submissions exist")
     void countByUserIdAndIsCorrect_NoSubmissions_ReturnsZero() {
-        // when
         long count = submissionRepository.countByUserIdAndIsCorrect(999L, true);
-
-        // then
         assertThat(count).isZero();
     }
 
     @Test
     @DisplayName("Should save submission with all fields")
     void save_CompleteSubmission_SavesSuccessfully() {
-        // given
         Submission submission = Submission.builder()
                 .user(testUser)
                 .question(testQuestion)
@@ -114,11 +107,7 @@ class SubmissionRepositoryTest {
                 .processingTimeMs(1500)
                 .aiProvider("GPT4O")
                 .build();
-
-        // when
         Submission saved = submissionRepository.save(submission);
-
-        // then
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getAiScore()).isEqualByComparingTo(BigDecimal.valueOf(9.5));
         assertThat(saved.getIsCorrect()).isTrue();

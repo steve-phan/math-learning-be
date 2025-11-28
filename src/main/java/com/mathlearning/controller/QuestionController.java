@@ -9,6 +9,7 @@ import com.mathlearning.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,8 @@ public class QuestionController {
 
     @GetMapping("/daily")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getDailyQuestions(Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) (auth != null ? auth.getPrincipal() : null);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

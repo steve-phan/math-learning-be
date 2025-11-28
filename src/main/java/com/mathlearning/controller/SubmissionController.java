@@ -7,6 +7,7 @@ import com.mathlearning.service.ISubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +26,8 @@ public class SubmissionController {
             @RequestParam("image") MultipartFile image,
             Authentication authentication) {
 
-        Long userId = (Long) authentication.getPrincipal();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) (auth != null ? auth.getPrincipal() : null);
 
         try {
             SubmissionResponse response = submissionService.createSubmission(userId, questionId, image);
@@ -38,7 +40,8 @@ public class SubmissionController {
 
     @GetMapping("/history")
     public ResponseEntity<ApiResponse<List<SubmissionDto>>> getHistory(Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) (auth != null ? auth.getPrincipal() : null);
 
         List<SubmissionDto> submissions = submissionService.getUserSubmissions(userId);
         return ResponseEntity.ok(ApiResponse.success(submissions));
@@ -49,7 +52,8 @@ public class SubmissionController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long userId = (Long) authentication.getPrincipal();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) (auth != null ? auth.getPrincipal() : null);
 
         try {
             SubmissionDto submission = submissionService.getSubmission(id, userId);

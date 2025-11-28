@@ -6,14 +6,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+@TestPropertySource(properties = "spring.flyway.enabled=false")
 @DisplayName("UserProgressRepository Tests")
 class UserProgressRepositoryTest {
 
@@ -41,7 +46,6 @@ class UserProgressRepositoryTest {
     @Test
     @DisplayName("Should find user progress by user ID")
     void findByUserId_ExistingUser_ReturnsProgress() {
-        // given
         UserProgress progress = UserProgress.builder()
                 .userId(testUser.getId())
                 .user(testUser)
@@ -52,10 +56,7 @@ class UserProgressRepositoryTest {
         entityManager.persist(progress);
         entityManager.flush();
 
-        // when
         Optional<UserProgress> found = userProgressRepository.findByUserId(testUser.getId());
-
-        // then
         assertThat(found).isPresent();
         assertThat(found.get().getTotalXp()).isEqualTo(100);
         assertThat(found.get().getCurrentStreak()).isEqualTo(5);
@@ -65,29 +66,20 @@ class UserProgressRepositoryTest {
     @Test
     @DisplayName("Should return empty when user progress not found")
     void findByUserId_NonExistingUser_ReturnsEmpty() {
-        // when
         Optional<UserProgress> found = userProgressRepository.findByUserId(999L);
-
-        // then
         assertThat(found).isEmpty();
     }
 
     @Test
     @DisplayName("Should save user progress")
     void save_ValidProgress_SavesSuccessfully() {
-        // given
         UserProgress progress = UserProgress.builder()
-                .userId(testUser.getId())
                 .user(testUser)
                 .totalXp(200)
                 .currentStreak(3)
                 .longestStreak(7)
                 .build();
-
-        // when
         UserProgress saved = userProgressRepository.save(progress);
-
-        // then
         assertThat(saved.getUserId()).isNotNull();
         assertThat(saved.getTotalXp()).isEqualTo(200);
         assertThat(saved.getUser().getId()).isEqualTo(testUser.getId());
@@ -96,7 +88,6 @@ class UserProgressRepositoryTest {
     @Test
     @DisplayName("Should update existing user progress")
     void save_UpdateProgress_UpdatesSuccessfully() {
-        // given
         UserProgress progress = UserProgress.builder()
                 .userId(testUser.getId())
                 .user(testUser)
@@ -107,12 +98,9 @@ class UserProgressRepositoryTest {
         entityManager.persist(progress);
         entityManager.flush();
 
-        // when
         progress.setTotalXp(150);
         progress.setCurrentStreak(6);
         UserProgress updated = userProgressRepository.save(progress);
-
-        // then
         assertThat(updated.getTotalXp()).isEqualTo(150);
         assertThat(updated.getCurrentStreak()).isEqualTo(6);
     }
