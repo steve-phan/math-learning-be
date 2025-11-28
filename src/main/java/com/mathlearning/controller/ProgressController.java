@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,8 +31,7 @@ public class ProgressController {
 
         @GetMapping
         public ResponseEntity<ApiResponse<ProgressDto>> getProgress(Authentication authentication) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                Long userId = (Long) (auth != null ? auth.getPrincipal() : null);
+                Long userId = extractUserId(authentication);
 
                 UserProgress progress = userProgressRepository.findByUserId(userId)
                                 .orElseGet(() -> UserProgress.builder()
@@ -60,8 +60,7 @@ public class ProgressController {
 
         @GetMapping("/mistakes")
         public ResponseEntity<ApiResponse<List<MistakeDto>>> getMistakes(Authentication authentication) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                Long userId = (Long) (auth != null ? auth.getPrincipal() : null);
+                Long userId = extractUserId(authentication);
 
                 List<MistakeNotebook> mistakes = mistakeNotebookRepository.findByUserIdAndReviewed(userId, false);
 
@@ -77,5 +76,36 @@ public class ProgressController {
                                 .collect(Collectors.toList());
 
                 return ResponseEntity.ok(ApiResponse.success(mistakeDtos));
+        }
+
+        private Long extractUserId(Authentication methodAuth) {
+                Authentication auth = methodAuth != null ? methodAuth
+                                : SecurityContextHolder.getContext().getAuthentication();
+                if (auth == null) {
+                        return null;
+                }
+                Object principal = auth.getPrincipal();
+                if (principal instanceof Long) {
+                        return (Long) principal;
+                }
+                if (principal instanceof Number) {
+                        return ((Number) principal).longValue();
+                }
+                if (principal instanceof String) {
+                        try {
+                                return Long.parseLong((String) principal);
+                        } catch (NumberFormatException e) {
+                                return null;
+                        }
+                }
+                if (principal instanceof UserDetails) {
+                        String username = ((UserDetails) principal).getUsername();
+                        try {
+                                return Long.parseLong(username);
+                        } catch (NumberFormatException e) {
+                                return null;
+                        }
+                }
+                return null;
         }
 }
